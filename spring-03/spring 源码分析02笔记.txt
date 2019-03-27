@@ -1,0 +1,101 @@
+AbstractBeanFactory
+---模板方法模式：流程内容在抽象类中制定好，具体操作的某一步骤，需要子类去实现
+	initBeanFactory(){
+		
+	}
+	abstract Resource getResource();
+
+}
+
+ClassPathXmlApplicationContext
+FileSystemXMLApplicationContext
+
+
+XmlBeanFactory容器初始化
+	Resource定位--资源的抽象---接口
+		--classpath---ClassPathResource
+			ClasspathResource resource = new ClasspathResource("spring.xml")；
+			Resource resource = getResource();
+		--URL--URLResource
+		--path---FileSystemResource
+	
+	BeanDefinition加载
+		BeanDefinitionReader---接口---XmlBeanDefinitionReader
+			DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+			XMLBeanDefinitionReader reader = new XMLBeanDefinitionReader(bf);
+			reader.loadBeanDefinitions(resource);
+		BeanDefinitionDocumentReader --- 接口---去针对   只是去按照XML语法去封装Document
+		BeanDefinitionParserDelegate--类--主要是去按照spring的语义去解析Document中的元素
+		
+	BeanDefinition注册	
+
+Spring最核心的思想：面向对象编程思想、面向接口编程思想（解耦、IoC依赖注入）
+
+class A{
+	private B b = new B();
+}
+A - B接口 - B的实现类1\B的实现类2
+
+总结：
+1、spring中如何设计和思考的？面向对象编程思想（名称）、面向接口编程思想（解决对象和对象之间的依赖）
+2、通过XMLBeanFactory这个屌丝容器，去理解IoC容器的创建过程（Resource的资源定位、BeanDefinition加载和解析、BeanDefinition的注册）
+	只有BeanDefinition注册给了BeanFactory，IoC容器才可以说对JavaBean进行管理。
+
+3、要知道什么时候创建Bean的实例，并进行依赖注入？
+	发送时机：第一次去调用BeanFactory工厂的getBean方法（从容器中获取实例）
+	注意事项：默认情况下，一个Bean中容器中是单例存在的，也就是之后创建一次，那么如何实现该功能的呢？
+			  是使用缓存（Map结构去存储单例Bean）
+	
+	getBean的时候，就会去找对应的BeanDefinition（）信息，用于创建Bean实例
+	并根据BeanDefinition的依赖关系，按照顺序进行【依赖注入】。
+	
+	以下例子中对象创建的顺序是：C、B、A
+	
+	class A{
+		private B b ;
+	}
+	
+	class B{
+		private C c ;
+	}
+
+	如果发生A依赖B、B依赖A的情况，这就是传说中的循环依赖，对应的还有循环构造的说法。但是注意循环构造就是死循环，无法使用技术解决。但是循环依赖是可以解决的，spring采用了三级缓存进行了解决。
+	只能解决singleton的循环依赖
+4、什么时候调用getBean呢？
+	如果不是还有ApplicationContext这种高富帅容器的话，需要显示的去调用getBean方法。
+	默认在AbstractApplicationContext--onrefresh方法--第11步（默认创建单例非懒加载方式的JavaBean）---getBean
+	
+5、BeanFactory和ApplicationContext的区别？
+	BeanFactory相当于只关心工厂本身的工作内容。
+	ApplicationContext---继承了BeanFactory接口的两个子接口：
+		国际化
+		时间监听
+		...
+	
+	ClassPathXml
+	FileSystemXml
+	XmlWebApplicationContext（web容器，可以读取web环境中的spring资源信息）
+	
+6、Aware相关接口
+
+	本来spring中管理的bean都是一些pojo（简单的java对象，不去继承或者实现spring接口或者类）
+	但是如果spring中管理的bean需要获取比如ioc容器或者ioc获取中的beanname，则可以直接实现aware接口（ApplicationContextAware、BeanNameAware）
+
+7、BeanFactory和FactoryBean的区别？
+	BeanFactory就是管理JavaBean实例的工厂。
+	FactoryBean只是工厂中的一个特殊的JavaBean，该JavaBean可以产生指定对象。
+	
+	如果想根据beanname去BeanFactory中获取FactoryBean的本身，而不是FactoryBean产生的对象，需要在beanName前加&
+
+8、BeanFactoryPostProcessor和BeanPostProcessor的区别？
+	操作对象不同，BeanFactoryPostProcessor操作的是BeanDefinition，而BeanPostProcessor操作的是Bean
+	BeanFactoryPostProcessor可以有多个，是通过order属性来进行排序
+	BeanPostProcessor执行时机：一个是初始化完成Bean之后，调用init-method方法之前；一个是调用init-method方法之后
+	
+	举例来说：
+		PropertyPlaceHolderConfigurer -实现了- BeanFactoryPostProcessor：就是去替换BeanDefinition中的${}，也就是所谓的占位符
+			DataSource（driver--${db.driverName}）			
+		aop创建代理对象是在BeanPostProcessor的postProcessAfterInitialization去完成。
+		
+9、在BeanDefinition加载property标签的值，对应的类型常用的有两种：TypeStringValue（value对应的值、封装目标类型）、RuntimeBeanReference对象（引用类型，描述对应之间的引用信息）
+    除此之外，还有Array、List、Set、Map、Properties对应的值类型
