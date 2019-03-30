@@ -1,0 +1,29 @@
+
+手写需求：添加客户（Customer）---项目名称：spring-custom-5
+	表现层：Servlet
+	业务层：JavaBean
+	持久层：Jdbc、DBUtils
+	
+设计模式讲解
+	设计模式六大原则：开闭原则、依赖倒转原则、单一职责原则、迪米特法则、接口分离原理、里式替换原则
+	设计模式：简单工厂模式、工厂方法模式和抽象工厂模式
+
+手写spring框架分析（重点）---项目名称：spring-framework-custom
+	自定义spring配置文件（xml文件）
+		
+	加载xml配置文件，从中加载、解析并注册BeanDefinition（bean标签的信息）
+		读取XML配置文件
+			|----XmlReader(getResourceAsStream)
+			|----Resource接口（getInputStream）
+		创建Document对象
+			|----DocumentReader（loadDocument[inputStream]）
+		解析spring配置信息
+			|----BeanDefinitionParser（parseElement）
+				|----解析bean标签
+					|----解析bean标签中的id属性和class属性和init-method属性
+					|----解析bean标签中的property子标签
+						|----解析property子标签中的value和ref属性
+				|----将解析之后的bean标签信息，封装到BeanDefinition对象中	
+				|----将BeanDefinition信息封装到BeanDefinitionRegistry（Map数据结构，存储beanName和bean对象的映射关系）
+		
+	

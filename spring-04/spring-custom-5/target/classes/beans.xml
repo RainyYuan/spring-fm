@@ -1,0 +1,10 @@
+<beans>
+	<bean id="course" class="com.kkb.spring.po.Course">
+		<property name="name" value="spring"></property>
+	</bean>
+	
+	<bean id="student" class="com.kkb.spring.po.Student">
+		<property name="name" value="zengkeyan"></property>
+		<property name="course" ref="course"></property>
+	</bean>
+</beans>
