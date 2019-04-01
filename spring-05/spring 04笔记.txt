@@ -1,0 +1,33 @@
+IoC容器创建成功
+	BeanDefinition加载成功
+	Map<String,BeanDefinition> beanDefinitions : key是beanName，value是BeanDefinition
+获取Bean实例的流程分析
+	getBean(beanName)
+		1、根据beanName去对象缓存（Map数据结构<String,Object>）中获取对应的Bean，如果没回去成功，再走下面的流程
+		2、根据beanName去beanDefinitions集合中，获取BeanDefinition对象
+			a)创建对象.从BeanDefinition中获取beanClassName，根据该beanClassName可以反射创建
+			b)填充属性.从BeanDefinition中获取PropertyValue集合，解析该集合中不同类型的属性值完成属性填充
+				TypeStringValue		-----八种基本类型+String类型
+					value
+					targetType		需要单独获取（反射、内省）
+					
+					通过反射或者内省进行属性填充
+				RuntimeBeanReference-----引用类型（自定义的POJO类型）
+					refName-----getBean()			
+					
+					通过反射或者内省进行属性填充
+			c)对象初始化.从BeanDefinition中获取initMethod信息，根据反射调用指定的method方法
+		
+		
+	getBean(beanType)
+		疑问？为什么不能创建beanType和bean实例的映射
+		原因：beanType因为有继承和接口实现，所以说一个beanType可能对应多个Bean对象
+		
+		根据beanType获取BeanName集合（注意：一个beanType可能对应多个beanName）
+			根据beanName去容器中获取bean实例，如果获取了两个以上的bean实例，则报错
+			（判断依据：如果根据一个beanType获取到多个Bean对象，这个会报错的）
+			
+		
+		
+		
+		
