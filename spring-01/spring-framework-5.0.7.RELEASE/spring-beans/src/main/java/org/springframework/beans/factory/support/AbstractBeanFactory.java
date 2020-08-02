@@ -265,7 +265,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			// Fail if we're already creating this bean instance:
 			// We're assumably within a circular reference.
 			
-			// 如果原型模式的Bean发生循环引用，则直接不处理，抛出异常
+			//******** 如果原型模式的Bean发生循环引用，则直接不处理，抛出异常 *********************
 			if (isPrototypeCurrentlyInCreation(beanName)) {
 				throw new BeanCurrentlyInCreationException(beanName);
 			}

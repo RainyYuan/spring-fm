@@ -87,6 +87,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	private final Set<String> registeredSingletons = new LinkedHashSet<>(256);
 
 	/** Names of beans that are currently in creation */
+	//存储正在创建中的beanName ，再实例化bean前加入
 	private final Set<String> singletonsCurrentlyInCreation =
 			Collections.newSetFromMap(new ConcurrentHashMap<>(16));
 
@@ -188,7 +189,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		// 从一级缓存中获取单例对象
 		Object singletonObject = this.singletonObjects.get(beanName);
 		// isSingletonCurrentlyInCreation : 
-		// 		判断当前单例bean是否正在创建中，也就是没有初始化完成
+		// 		判断当前单例bean是否正在创建中，也就是没有初始化完成     --------------MAP  singletonsCurrentlyInCreation
 		//		比如A的构造器依赖了B对象所以得先去创建B对象，或者在A的populateBean过程中依赖了B对象，得先去创建B对象
 		//		这时的A就是处于创建中的状态。
 		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
